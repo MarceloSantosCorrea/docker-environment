@@ -1,0 +1,72 @@
+version: "3.5"
+services:
+  app:
+    build:
+      context: ./php-fpm
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+    image: marcelocorrea/php${PHP_VERSION}-fpm
+    container_name: php-fpm
+    tty: true
+    volumes:
+#      - .:/var/www
+      - ./.docker-dev/php-fpm/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
+    expose:
+      - 9000
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+  mysql:
+    build: ./mysql
+    image: marcelocorrea/mysql5.7
+    container_name: mysql
+    tty: true
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=root
+      - TZ=UTC
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+  nginx:
+    build: ./nginx
+    image: marcelocorrea/nginx
+    container_name: nginx
+    tty: true
+    volumes:
+      # - .:/var/www
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/sites:/etc/nginx/sites-available
+      - ./nginx/ssl:/etc/nginx/ssl
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+    depends_on:
+      - app
+    networks:
+      - app-network
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - redis:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  mysql:
+    driver: local
+  redis:
+    driver: local
