@@ -1,7 +1,7 @@
 ###Starting
 
 ```
-copy .env.example .env
+cp .env.example .env
 docker-compose up
 ```
 
