@@ -17,6 +17,21 @@ services:
       - mysql
     networks:
       - app-network
+  php-worker:
+    build:
+      context: ./php-worker
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+    image: marcelocorrea/php${PHP_VERSION}-worker
+    container_name: php-worker
+    tty: true
+    volumes:
+#      - .:/var/www
+      - ./php-worker/supervisor:/etc/supervisor
+    depends_on:
+      - app
+    networks:
+      - app-network
   mysql:
     build: ./mysql
     image: marcelocorrea/mysql5.7
