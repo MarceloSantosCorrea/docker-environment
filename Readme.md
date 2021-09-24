@@ -2,6 +2,8 @@
 
 ```
 cp .env.example .env
+install laravel
+PATH_SOURCE=path_install_paravel
 docker-compose up
 ```
 
