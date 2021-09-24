@@ -1,25 +1,32 @@
+###Starting
+
+```
+copy .env.example .env
+docker-compose up
+```
+
 ##Mysql
 
-<code>
-    docker build -t marcelocorrea/mysql:5.7 ./mysql
-</code>
+```
+docker build -t marcelocorrea/mysql:5.7 ./mysql
+```
 
 ##PHP FPM
 
-<code>
-    docker build -t marcelocorrea/php7.4-fpm ./php-fpm
-    docker build -t marcelocorrea/php8.0-fpm ./php-fpm
-</code>
+```
+docker build -t marcelocorrea/php7.4-fpm ./php-fpm
+docker build -t marcelocorrea/php8.0-fpm ./php-fpm
+```
 
 ##PHP Worker
 
-<code>
-    docker build -t marcelocorrea/php7.4-worker ./php-worker
-    docker build -t marcelocorrea/php8.0-worker ./php-worker
-</code>
+```
+docker build -t marcelocorrea/php7.4-worker ./php-worker
+docker build -t marcelocorrea/php8.0-worker ./php-worker
+```
 
 ##Nginx
 
-<code>
-    docker build -t marcelocorrea/nginx:latest ./nginx
-</code>
+```
+docker build -t marcelocorrea/nginx:latest ./nginx
+```

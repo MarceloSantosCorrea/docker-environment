@@ -9,7 +9,7 @@ services:
     container_name: php-fpm
     tty: true
     volumes:
-#      - .:/var/www
+      - .${PATH_SOURCE}:/var/www
       - ./.docker-dev/php-fpm/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
     expose:
       - 9000
@@ -26,7 +26,7 @@ services:
     container_name: php-worker
     tty: true
     volumes:
-#      - .:/var/www
+      - .${PATH_SOURCE}:/var/www
       - ./php-worker/supervisor:/etc/supervisor
     depends_on:
       - app
@@ -56,7 +56,7 @@ services:
     container_name: nginx
     tty: true
     volumes:
-      # - .:/var/www
+      - .${PATH_SOURCE}:/var/www
       - ./nginx/logs:/var/log/nginx
       - ./nginx/sites:/etc/nginx/sites-available
       - ./nginx/ssl:/etc/nginx/ssl
