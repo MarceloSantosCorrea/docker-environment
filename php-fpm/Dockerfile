@@ -87,7 +87,7 @@ ffmpeg
 
 RUN apt-get -yq install libxml2-dev; \
 if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ]; then \
-  pecl install xmlrpc-1.0.0RC2; \
+  pecl install xmlrpc-1.0.0RC3; \
   docker-php-ext-enable xmlrpc; \
 else \
   docker-php-ext-install xmlrpc; \
@@ -95,17 +95,48 @@ fi
 
 RUN docker-php-ext-install exif bcmath
 
-RUN apt-get install -y wget && \
-cd /usr/local/src && \
-rm -rf curl* && \
-wget https://curl.haxx.se/download/curl-7.73.0.tar.gz && \
-tar -xvf curl-7.73.0.tar.gz && \
-cd curl-7.73.0 && \
-./configure --with-libzstd --with-libssh2 --with-libmetalink --with-ngtcp2 && \
-make && \
-make install && \
-cp /usr/local/bin/curl /usr/bin/curl && \
-ldconfig
+#RUN apt-get install -y wget && \
+#cd /usr/local/src && \
+#rm -rf curl* && \
+#wget https://curl.haxx.se/download/curl-7.73.0.tar.gz && \
+#tar -xvf curl-7.73.0.tar.gz && \
+#cd curl-7.73.0 && \
+#./configure --with-libzstd --with-libssh2 --with-libmetalink --with-ngtcp2 && \
+#make && \
+#make install && \
+#cp /usr/local/bin/curl /usr/bin/curl && \
+#ldconfig
+
+###########################################################################
+# xDebug:
+###########################################################################
+
+ARG XDEBUG_PORT=9003
+
+RUN if [ ${PHP_VERSION} = "8.2.5" ]; then \
+  pecl install xdebug-3.2.1; \
+else \
+  pecl install xdebug-3.1.4; \
+fi && \
+docker-php-ext-enable xdebug
+
+# Copy xdebug configuration for remote debugging
+COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+
+RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] || { [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && { [ $(php -r "echo PHP_MINOR_VERSION;") = "4" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "3" ] ;} ;}; then \
+  sed -i "s/xdebug.remote_host=/xdebug.client_host=/" /usr/local/etc/php/conf.d/xdebug.ini && \
+  sed -i "s/xdebug.remote_connect_back=0/xdebug.discover_client_host=false/" /usr/local/etc/php/conf.d/xdebug.ini && \
+  sed -i "s/xdebug.remote_port=9000/xdebug.client_port=${XDEBUG_PORT}/" /usr/local/etc/php/conf.d/xdebug.ini && \
+  sed -i "s/xdebug.profiler_enable=0/; xdebug.profiler_enable=0/" /usr/local/etc/php/conf.d/xdebug.ini && \
+  sed -i "s/xdebug.profiler_output_dir=/xdebug.output_dir=/" /usr/local/etc/php/conf.d/xdebug.ini && \
+  sed -i "s/xdebug.remote_mode=req/; xdebug.remote_mode=req/" /usr/local/etc/php/conf.d/xdebug.ini && \
+  sed -i "s/xdebug.remote_autostart=0/xdebug.start_with_request=yes/" /usr/local/etc/php/conf.d/xdebug.ini && \
+  sed -i "s/xdebug.remote_enable=0/xdebug.mode=debug/" /usr/local/etc/php/conf.d/xdebug.ini \
+;else \
+  sed -i "s/xdebug.remote_autostart=0/xdebug.remote_autostart=1/" /usr/local/etc/php/conf.d/xdebug.ini && \
+  sed -i "s/xdebug.remote_enable=0/xdebug.remote_enable=1/" /usr/local/etc/php/conf.d/xdebug.ini \
+;fi
+RUN sed -i "s/xdebug.cli_color=0/xdebug.cli_color=1/" /usr/local/etc/php/conf.d/xdebug.ini
 
 COPY ./laravel.ini /usr/local/etc/php/conf.d
 COPY ./xlaravel.pool.conf /usr/local/etc/php-fpm.d/
